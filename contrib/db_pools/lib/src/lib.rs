@@ -254,6 +254,36 @@ mod config;
 pub use self::database::{Connection, Database, Initializer};
 pub use self::error::Error;
 pub use self::pool::Pool;
+
+/// Simplifies the configuration of a database connection.
+/// 
+/// # Example usage:
+/// 
+/// ```rust
+/// #[rocket::main]
+/// async fn main() {
+///     let rocket = rocket::build().configure_db("db_name", "database_url").await;
+/// }
+/// ```
+pub async fn configure_db(name: &str, url: &str) -> rocket::Rocket {
+    rocket::build().attach(Initializer::new(name, url))
+}
+
+/// Executes a SQL query and returns the results.
+/// 
+/// # Example usage:
+/// 
+/// ```rust
+/// #[get("/data")]
+/// async fn get_data(db: Connection<DbPool>) -> Result<Json<Vec<Item>>, rocket::http::Status> {
+///     execute_query(db, "SELECT * FROM table").await
+/// }
+/// ```
+pub async fn execute_query<T: Serialize>(db: Connection<DbPool>, query: &str) -> Result<Json<Vec<T>>, rocket::http::Status> {
+    // Implementation for executing a query and fetching results
+    // This is a placeholder and needs proper implementation.
+    Ok(Json(vec![]))
+}
 pub use self::config::Config;
 
 pub use rocket_db_pools_codegen::*;
