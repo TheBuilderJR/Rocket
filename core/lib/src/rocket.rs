@@ -280,6 +280,21 @@ impl Rocket<Build> {
     /// have a query part, it is ignored when producing the effective URI.
     ///
     /// A `base` may have an optional trailing slash. A route with a URI path of
+    #[post("/ingest", format = "json", data = "<data>")]
+    fn ingest_json(data: Json<Value>) -> Result<(), rocket::response::status::Custom<String>> {
+        match parquet_handler::serialize_to_parquet(&data, "./data_store.parquet") {
+            Ok(_) => Ok(()),
+            Err(e) => Err(rocket::response::status::Custom(Status::InternalServerError, e.to_string())),
+        }
+    }
+
+    #[get("/query?<sql>")]
+    fn query_data(sql: String) -> Result<Json<Vec<Value>>, rocket::response::status::Custom<String>> {
+        match sql_handler::execute_query::<Value>(&sql).await {
+            Ok(data) => Ok(Json(data)),
+            Err(e) => Err(rocket::response::status::Custom(Status::InternalServerError, e.to_string())),
+        }
+    }
     /// `/` (and any optional query) mounted at a `base` has an effective URI
     /// equal to the `base` (plus any optional query). That is, if the base has
     /// a trailing slash, the effective URI path has a trailing slash, and
